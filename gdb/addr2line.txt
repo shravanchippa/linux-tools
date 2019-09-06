@@ -1,0 +1,25 @@
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$ gcc -g test_01.c
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$ ./a.out
+Segmentation fault (core dumped)
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$ dmesg | tail
+[3102070.769299] RAX: ffffffffffffffda RBX: 000055bdc70415d0 RCX: 00007f1f3bd74c60
+[3102070.769301] RDX: 000055bdc544a9d2 RSI: 00000000000a0800 RDI: 000055bdc702d580
+[3102070.769303] RBP: 0000000000000000 R08: 0000000000000073 R09: 0000000000000003
+[3102070.769306] R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000000000
+[3102070.769308] R13: 000055bdc70415d0 R14: 00007fff6146b6e0 R15: 0000000000000000
+[3102247.194732] ISO 9660 Extensions: Microsoft Joliet Level 3
+[3102247.195872] ISO 9660 Extensions: Microsoft Joliet Level 3
+[3102247.196582] ISO 9660 Extensions: RRIP_1991A
+[3102253.052256] usb 3-8: USB disconnect, device number 12
+[3102960.114489] a.out[9864]: segfault at 0 ip 00000000004004e6 sp 00007ffdfd2309e0 error 6 in a.out[400000+1000]
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$ add
+add-apt-repository  addgnupghome        addgroup            addpart             addr2line           add-shell           adduser
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$ addr2line 00000000004004e6 ./a.out
+/home/ftddev1/shravan/persanal/linux-tools/gdb/test_01.c:5
+??:0
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$
