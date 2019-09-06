@@ -1,0 +1,64 @@
+https://linux-kernel-labs.github.io/master/lectures/debugging.html
+
+
+
+root@qemux86:~/skels/debugging/oops# insmod oops.ko
+BUG: unable to handle kernel NULL pointer dereference at 00000042
+Call Trace:
+so2_oops_init+0x17/0x20 [oops]
+do_one_initcall+0x37/0x170
+? cache_alloc_debugcheck_after.isra.19+0x15f/0x2f0
+? __might_sleep+0x32/0x90
+? trace_hardirqs_on_caller+0x11c/0x1a0
+? do_init_module+0x17/0x1c2
+? kmem_cache_alloc+0xa4/0x1e0
+? do_init_module+0x17/0x1c2
+do_init_module+0x46/0x1c2
+load_module+0x1f45/0x2380
+SyS_init_module+0xe5/0x100
+do_int80_syscall_32+0x61/0x190
+entry_INT80_32+0x2f/0x2f
+Killed
+
+
+
+$ addr2line -e oops.o  0x08
+$ skels/debugging/oops/oops.c:5
+$ # 0x08 is the offset of the offending instruction inside the oops.ko module
+
+
+objdump
+***********************************************
+$ cat /proc/modules
+oops 20480 1 - Loading 0xc8816000 (O+)
+
+$ objdump -dS --adjust-vma=0xc8816000 oops.ko
+c8816000:       b8 61 00 00 00          mov    $0x61,%eax
+
+static noinline void do_oops(void)
+{
+c8816005:       55                      push   %ebp
+c8816006:       89 e5                   mov    %esp,%ebp
+*(int*)0x42 = 'a';
+c8816008:       a3 42 00 00 00          mov    %eax,0x42
+
+
+gdb
+********************************************
+$ gdb ./vmlinux
+
+(gdb) list *(do_panic+0x8)
+0xc1244138 is in do_panic (lib/test_panic.c:8).
+3
+4 static struct timer_list panic_timer;
+5
+6 static void do_panic(struct timer_list *unused)
+7 {
+8         *(int*)0x42 = 'a';
+9 }
+10
+11        static int so2_panic_init(void)
+
+
+
+

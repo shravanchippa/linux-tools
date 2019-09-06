@@ -1,0 +1,9 @@
+Kmemleak
+Kmemleak provides a way of detecting kernel memory leaks in a way similar to a tracing garbage collector. You can find more information here in Documentation/dev-tools/kmemleak.rst.
+
+CONFIG_DEBUG_KMEMLEAK
+mount -t debugfs nodev /sys/kernel/debug
+echo scan > /sys/kernel/debug/kmemleak
+echo clear > /sys/kernel/debug/kmemleak
+cat /sys/kernel/debug/kmemleak
+
