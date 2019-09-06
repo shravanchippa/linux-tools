@@ -1,0 +1,33 @@
+Using Ftrace Before you can use Ftrace, you have to mount the debugfs filesystem
+which, by convention, goes in the /sys/kernel/debug directory:
+
+# mount –t debugfs none /sys/kernel/debug
+All the controls for Ftrace are in the /sys/kernel/debug/tracing directory; there
+is even a mini HOWTO in the README file.
+This is the list of tracers available in the kernel:
+
+# cat /sys/kernel/debug/tracing/available_tracers
+blk function_graph function nop
+
+The active tracer is shown by current_tracer, which, initially, will be the null
+tracer, nop.
+To capture a trace, select the tracer by writing the name of one of the
+available_tracers to current_tracer, then enable tracing for a short while,
+as shown here:
+
+# echo function > /sys/kernel/debug/tracing/current_tracer
+# echo 1 > /sys/kernel/debug/tracing/tracing_on
+# sleep 1
+# echo 0 > /sys/kernel/debug/tracing/tracing_on
+
+
+In that one second, the trace buffer will have been filled with the details of every
+function called by the kernel. The format of the trace buffer is plain text, as described
+in Documentation/trace/ftrace.txt. You can read the trace buffer from the trace
+file:
+
+# cat /sys/kernel/debug/tracing/trace
+# tracer: function
+#
+# entries-in-buffer/entries-written: 40051/40051 #P:1
+
