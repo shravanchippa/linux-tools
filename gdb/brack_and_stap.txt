@@ -1,0 +1,59 @@
+gdb command shortcuts
+Use following shortcuts for most of the frequent gdb operations.
+
+break [file_name]:func_name
+
+l – list
+p – print
+c – continue
+s – step
+
+bt: backtrack – Print backtrace of all stack frames, or innermost COUNT frames.
+
+Examples:
+print i
+print j
+print num
+
+(gdb) p i
+$1 = 1
+(gdb) p j
+$2 = 3042592
+(gdb) p num
+$3 = 3
+(gdb)
+
+ftddev1@ftddev1-recovary:~/shravan/persanal/linux-tools/gdb$ gdb ./a.out
+GNU gdb (Ubuntu 7.11.1-0ubuntu1~16.5) 7.11.1
+Copyright (C) 2016 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+(gdb)
+(gdb) break test_01.c:main
+Breakpoint 1 at 0x4004f3: file test_01.c, line 9.
+(gdb)
+Note: breakpoint 1 also set at pc 0x4004f3.
+Breakpoint 2 at 0x4004f3: file test_01.c, line 9.
+(gdb)
+Note: breakpoints 1 and 2 also set at pc 0x4004f3.
+Breakpoint 3 at 0x4004f3: file test_01.c, line 9.
+(gdb) run
+Starting program: /home/ftddev1/shravan/persanal/linux-tools/gdb/a.out
+
+Breakpoint 1, main () at test_01.c:9
+9           foo();
+(gdb) s
+foo () at test_01.c:4
+4           int *ptr = 0;
+(gdb) s
+5           *ptr = 7;
+(gdb) bt
+#0  0x00000000004004e6 in foo () at test_01.c:5
+#1  0x00000000004004fd in main () at test_01.c:9
+(gdb) s
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00000000004004e6 in foo () at test_01.c:5
+5           *ptr = 7;
+(gdb)
+
