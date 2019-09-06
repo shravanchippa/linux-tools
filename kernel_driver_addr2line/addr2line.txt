@@ -1,0 +1,16 @@
+[   88.635223] CPU: 0    Not tainted  (2.6.32 #385)
+[   88.635253] PC is at msmfb_suspend+0x1c/0x2c
+[   88.635284] LR is at msmfb_suspend+0x20/0x2c
+[   88.635314] pc : [<c01b063c>]    lr : [<c01b0640>]    psr: a0000013
+[   88.635314] sp : c6847f38  ip : c6847f50  fp : c6847f4c
+[   88.635345] r10: c6847f84  r9 : c68009a8  r8 : c04e47e8
+[   88.635345] r7 : c04e4818  r6 : c68e6ea0  r5 : c0535c1c  r4 : c68e6ea0
+[   88.635375] r3 : 00000fc5  r2 : c04e1f64  r1 : c6846000  r0 : 00000fc5
+[   88.635406] Flags: NzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+[   88.635437] Control: 00c5387d  Table: 15db8008  DAC: 00000017
+
+
+
+# arm-none-linux-gnueabi-addr2line -f -e vmlinux c01b063c
+msmfb_suspend
+/home/gnutoo/embedded/htcdream/SHR/kernel/linux/drivers/video/msm/msm_fb.c:485
