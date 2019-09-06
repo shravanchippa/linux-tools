@@ -1,0 +1,1 @@
+strace is a system call and signal tracer. It is primarily used to trace system calls (that is, function calls made from programs to the kernel), print the arguments passed to system calls, print return values, timing information and more. It can also trace and output information about signals received by the process.

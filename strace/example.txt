@@ -1,0 +1,66 @@
+open system call trace for ls command
+
+***************************************
+
+ftddev1@ftddev1-recovary:~$ strace -e open ls
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+open("/lib/x86_64-linux-gnu/libselinux.so.1", O_RDONLY|O_CLOEXEC) = 3
+open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+open("/lib/x86_64-linux-gnu/libpcre.so.3", O_RDONLY|O_CLOEXEC) = 3
+open("/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+open("/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
+open("/proc/filesystems", O_RDONLY)     = 3
+open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+open(".", O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_CLOEXEC) = 3
+2.0.3.19_auth.dat  Documents  examples.desktop  images_tp4100  nani_tmp    oprofile_data  Public   socfpga.dtb                     tp4100                 tp4100_rootfs.tgz            vendor.pcp
+chethan.conf       Downloads  help_oprofile     minicom.log    new.pcapng  output.svg     shravan  Templates                       tp4100_bootloader.tgz  u-boot.img                   Videos
+Desktop            env        help_perf         Music          old.pcapng  Pictures       snap     TimeProvider4100_v2.0.3.19.bin  tp4100_preloader.tgz   u-boot-socfpga-cyclone5.img  zImage
++++ exited with 0 +++
+ftddev1@ftddev1-recovary:~$
+
+***************************************
+
+
+Generate Statistics Report of System Calls Using Option
+
+**************************************
+
+$ strace -c ls /home
+bala
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+  -nan    0.000000           0         9           read
+  -nan    0.000000           0         1           write
+  -nan    0.000000           0        11           open
+  -nan    0.000000           0        13           close
+  -nan    0.000000           0         1           execve
+  -nan    0.000000           0         9         9 access
+
+**************************************
+
+
+Print Relative Time for System Calls Using Option -r
+**************************************
+
+$ strace -r ls 
+     0.000000 execve("/bin/ls", ["ls"], [/* 37 vars */]) = 0
+     0.000846 brk(0)                    = 0x8418000
+     0.000143 access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory)
+     0.000163 mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRI
+**************************************
+
+
+ Save the Trace Execution to a File Using Option -o
+**************************************
+$ strace -o output.txt ls
+Desktop  Documents  Downloads  examples.desktop  libflashplayer.so
+Music  output.txt  Pictures  Public  Templates  Ubuntu_OS  Videos
+
+$ cat output.txt 
+execve("/bin/ls", ["ls"], [/* 37 vars */]) = 0
+brk(0)                                  = 0x8637000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+mmap2(NULL, 8192, PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb7860000
+**************************************
+
+
