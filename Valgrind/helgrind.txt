@@ -1,0 +1,15 @@
+Helgrind can detect three classes of error. Firstly, it can detect the incorrect use
+of the API. For example, it can unlock a mutex that is already unlocked, unlock a
+mutex that was locked by a different thread, not checking the return value of certain
+Pthread functions. Secondly, it monitors the order in which threads acquire locks
+and thus detects potential deadlocks which could arise from the formation of cycles
+of locks. Finally, it detects data races which can happen when two threads access a
+shared memory location without using suitable locks or other synchronization to
+ensure single-threaded access.
+
+
+Using Helgrind is simple, you just need this command:
+# valgrind --tool=helgrind <program>
+
+
+
