@@ -1,0 +1,167 @@
+buildroot-2019.02.5
+Linux version 4.14.40 + kgdb.patch (in same dir it is present)
+U-Boot 2018.07
+
+*************************************************************
+buildroot-2019.02.5:
+shravan@geetha:~/work/am335x/buildroot-2019.02.5$ make beaglebone_defconfig
+shravan@geetha:~/work/am335x/buildroot-2019.02.5$ make menuconfig
+
+Added
+gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf.tar.xz 
+
+shravan@geetha:~/work/am335x/buildroot-2019.02.5$ make 
+
+*************************************************************
+kernel configs : Linux version 4.14.40
+
+Apply the kgdb.patch (in same dir it is present)
+
+CONFIG_DEBUG_INFO
+CONFIG_KGDB
+CONFIG_KGDB_SERIAL_CONSOLE
+
+*************************************************************
+U-Boot 2018.07: (kgdboc=ttyO0,115200 kgdbwait)
+
+setenv bootargs 'console=ttyO0,115200 root=/dev/mmcblk0p2 rw rootfstype=ext3 rootwait kgdboc=ttyO0,115200 kgdbwait'
+setenv bootcmd  'fatload mmc 0:1 0x82000000 zImage;fatload mmc 0:1 0x88000000 am335x-phycore-rdk.dtb;bootz 0x82000000 - 0x88000000'
+boot
+
+kernel will stop at:
+[    1.693101] omap_uart 481a6000.serial: no wakeirq for uart3
+[    1.699672] 481a6000.serial: ttyO3 at MMIO 0x481a6000 (irq = 32, base_baud = 3000000) is a OMAP UART3
+[    1.711874] KGDB: Registered I/O driver kgdboc
+[    1.716819] KGDB: Waiting for connection from remote gdb...
+
+***************************************************************
+
+
+please close the terminal ofter this: 
+
+On-host:
+
+go to root user
+root@geetha:/home/shravan/work/am335x/linux$ sudo su
+
+export toolchain
+root@geetha:/home/shravan/work/am335x/linux# source /home/shravan/toolchain/env.sh
+
+load vmlinux:
+root@geetha:/home/shravan/work/am335x/linux# arm-linux-gnueabihf-gdb ./vmlinux
+GNU gdb (Linaro_GDB-2018.05) 8.1.0.20180612-git
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "--host=x86_64-unknown-linux-gnu --target=arm-linux-gnueabihf".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./vmlinux...done.
+(gdb)
+(gdb) target remote /dev/ttyS0
+Remote debugging using /dev/ttyS0
+0xc020ceb0 in arch_kgdb_breakpoint () at kernel/debug/debug_core.c:1071
+1071            wmb(); /* Sync point before breakpoint */
+(gdb)
+(gdb) break do_mount
+Breakpoint 1 at 0xc02ea0a4: file fs/namespace.c, line 2766.
+(gdb) c
+Continuing.
+[New Thread 40]
+[New Thread 41]
+[New Thread 43]
+[New Thread 44]
+[New Thread 45]
+[New Thread 46]
+[New Thread 47]
+[New Thread 48]
+
+Thread 2 hit Breakpoint 1, do_mount (dev_name=0xce699740 "/dev/root", dir_name=0xc0a8d4b4 "/root", type_page=0xce699780 "ext3", flags=32768, data_page=0x0)
+    at fs/namespace.c:2766
+2766    {
+(gdb)
+(gdb) s
+2772            if ((flags & MS_MGC_MSK) == MS_MGC_VAL)
+(gdb) list
+2767            struct path path;
+2768            unsigned int mnt_flags = 0, sb_flags;
+2769            int retval = 0;
+2770
+2771            /* Discard magic */
+2772            if ((flags & MS_MGC_MSK) == MS_MGC_VAL)
+2773                    flags &= ~MS_MGC_MSK;
+2774
+2775            /* Basic sanity checks */
+2776            if (data_page)
+
+
+***********************************************************
+
+
+If you have finished the debug session and want to disable kgdboc, just set the
+kgdboc terminal to null:
+# echo "" > /sys/module/kgdboc/parameters/kgdboc
+
+
+
+**********************************************************
+Full log:
+
+U-Boot SPL 2018.07 (Sep 15 2019 - 15:20:21 +0530)
+Trying to boot from MMC1
+SPL: Please implement spl_start_uboot() for your board
+SPL: Direct Linux boot not active!
+
+
+U-Boot 2018.07 (Sep 15 2019 - 15:20:21 +0530)
+
+CPU  : AM335X-GP rev 1.0
+I2C:   ready
+DRAM:  256 MiB
+MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+Net:   <ethaddr> not set. Reading from E-fuse
+Could not get PHY for cpsw: addr 0
+cpsw, usb_ether
+Error: usb_ether address not set.
+
+Hit any key to stop autoboot:  0
+=>
+=> setenv bootargs 'console=ttyO0,115200 root=/dev/mmcblk0p2 rw rootfstype=ext3 rootwait kgdboc=ttyO0,115200 kgdbwait'
+=> setenv bootcmd  'fatload mmc 0:1 0x82000000 zImage;fatload mmc 0:1 0x88000000 am335x-phycore-rdk.dtb;bootz 0x82000000 - 0x88000000'
+=> boot
+4076240 bytes read in 364 ms (10.7 MiB/s)
+42696 bytes read in 6 ms (6.8 MiB/s)
+## Flattened Device Tree blob at 88000000
+   Booting using the fdt blob at 0x88000000
+   Loading Device Tree to 8df25000, end 8df326c7 ... OK
+
+Starting kernel ...
+
+Uncompressing Linux... done, booting the kernel.
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 4.14.40 (shravan@geetha) (gcc version 7.3.1 20180425 [linaro-7.3-2018.05 revision d29120a424ecfbc167ef90065c0eeb7f91977701] (Lin9
+[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=10c5387d
+.
+.
+.
+.
+[    0.895068] pinctrl-single 44e10800.pinmux: 142 pins at pa f9e10800 size 568
+[    0.904381] Serial: 8250/16550 driver, 6 ports, IRQ sharing enabled
+[    0.916080] omap_uart 44e09000.serial: no wakeirq for uart0
+[    0.917518] 44e09000.serial: ttyO0 at MMIO 0x44e09000 (irq = 30, base_baud = 3000000) is a OMAP UART0
+[    1.668139] console [ttyO0] enabled
+[    1.674473] omap_uart 48024000.serial: no wakeirq for uart2
+[    1.681239] 48024000.serial: ttyO2 at MMIO 0x48024000 (irq = 31, base_baud = 3000000) is a OMAP UART2
+[    1.693101] omap_uart 481a6000.serial: no wakeirq for uart3
+[    1.699672] 481a6000.serial: ttyO3 at MMIO 0x481a6000 (irq = 32, base_baud = 3000000) is a OMAP UART3
+[    1.711874] KGDB: Registered I/O driver kgdboc
+[    1.716819] KGDB: Waiting for connection from remote gdb...
+
+
