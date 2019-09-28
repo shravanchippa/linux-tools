@@ -1,3 +1,7 @@
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
+
 static noinline void do_oops(void)
 {
     *(int*)0x42 = 'a';
@@ -18,3 +22,8 @@ static void so2_oops_exit(void)
 
 module_init(so2_oops_init);
 module_exit(so2_oops_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("shravan kumar");
+MODULE_DESCRIPTION("A simple example Linux module");
+MODULE_VERSION("0.01");

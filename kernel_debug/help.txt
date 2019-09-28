@@ -2,24 +2,64 @@ https://linux-kernel-labs.github.io/master/lectures/debugging.html
 
 
 
-root@qemux86:~/skels/debugging/oops# insmod oops.ko
-BUG: unable to handle kernel NULL pointer dereference at 00000042
-Call Trace:
-so2_oops_init+0x17/0x20 [oops]
-do_one_initcall+0x37/0x170
-? cache_alloc_debugcheck_after.isra.19+0x15f/0x2f0
-? __might_sleep+0x32/0x90
-? trace_hardirqs_on_caller+0x11c/0x1a0
-? do_init_module+0x17/0x1c2
-? kmem_cache_alloc+0xa4/0x1e0
-? do_init_module+0x17/0x1c2
-do_init_module+0x46/0x1c2
-load_module+0x1f45/0x2380
-SyS_init_module+0xe5/0x100
-do_int80_syscall_32+0x61/0x190
-entry_INT80_32+0x2f/0x2f
-Killed
+# insmod /lib/modules/oops.ko 
+[   28.077691] oops: loading out-of-tree module taints kernel.
+[   28.085615] oops_init
+[   28.088542] Unable to handle kernel NULL pointer dereference at virtual address 00000042
+[   28.097184] pgd = ce700000
+[   28.100052] [00000042] *pgd=8e6d5831, *pte=00000000, *ppte=00000000
+[   28.106812] Internal error: Oops: 817 [#1] SMP ARM
+[   28.111871] Modules linked in: oops(O+)
+[   28.115949] CPU: 0 PID: 87 Comm: insmod Tainted: G           O    4.14.40 #3
+[   28.123373] Hardware name: Generic AM33XX (Flattened Device Tree)
+[   28.129793] task: ce384080 task.stack: ce6dc000
+[   28.134582] PC is at do_oops+0x8/0x10 [oops]
+[   28.139088] LR is at so2_oops_init+0x10/0x1c [oops]
+[   28.144224] pc : [<bf000008>]    lr : [<bf000020>]    psr: 600e0013
+[   28.150823] sp : ce6dde00  ip : 00000000  fp : c14eec04
+[   28.156327] r10: c01dfa20  r9 : 00000001  r8 : ce6cab30
+[   28.161834] r7 : bf002000  r6 : ffffe000  r5 : bf000010  r4 : 00000000
+[   28.168706] r3 : 00000000  r2 : 00000061  r1 : 00000001  r0 : 00000009
+[   28.175582] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment none
+[   28.183096] Control: 10c5387d  Table: 8e700019  DAC: 00000051
+[   28.337786] [<bf000008>] (do_oops [oops]) from [<bf000020>] (so2_oops_init+0x10/0x1c [oops])
+[   28.346697] [<bf000020>] (so2_oops_init [oops]) from [<c0101e98>] (do_one_initcall+0x3c/0x16c)
+[   28.355784] [<c0101e98>] (do_one_initcall) from [<c01e4068>] (do_init_module+0x5c/0x1e0)
+[   28.364316] [<c01e4068>] (do_init_module) from [<c01e3214>] (load_module+0x1fc4/0x25d4)
+[   28.372753] [<c01e3214>] (load_module) from [<c01e3a50>] (SyS_finit_module+0x98/0xb4)
+[   28.381015] [<c01e3a50>] (SyS_finit_module) from [<c0107d80>] (ret_fast_syscall+0x0/0x28)
+[   28.389638] Code: bad PC value
+[   28.392949] ---[ end trace 0942a2af24f5bbec ]---
+Segmentation fault
+# 
+# 
 
+#  cat /proc/modules
+oops 20480 1 - Loading 0xbf000000 (O+)
+
+
+*******************************
+# arm-linux-gnueabihf-objdump -dS --adjust-vma=0xbf000000 oops.ko
+oops.ko:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+bf000000 <do_oops>:
+#include <linux/module.h>
+#include <linux/kernel.h>
+
+static noinline void do_oops(void)
+{
+    *(int*)0x42 = 'a';
+bf000000:	e3a03000 	mov	r3, #0
+bf000004:	e3a02061 	mov	r2, #97	; 0x61
+bf000008:	e5832042 	str	r2, [r3, #66]	; 0x42
+}
+bf00000c:	e12fff1e 	bx	lr
+
+bf000010 <init_module>:
+*****************************************
 
 
 $ addr2line -e oops.o  0x08
@@ -27,38 +67,63 @@ $ skels/debugging/oops/oops.c:5
 $ # 0x08 is the offset of the offending instruction inside the oops.ko module
 
 
-objdump
-***********************************************
-$ cat /proc/modules
-oops 20480 1 - Loading 0xc8816000 (O+)
 
-$ objdump -dS --adjust-vma=0xc8816000 oops.ko
-c8816000:       b8 61 00 00 00          mov    $0x61,%eax
 
-static noinline void do_oops(void)
-{
-c8816005:       55                      push   %ebp
-c8816006:       89 e5                   mov    %esp,%ebp
-*(int*)0x42 = 'a';
-c8816008:       a3 42 00 00 00          mov    %eax,0x42
+If derver is there in said the kernel
 
+********************************************
+
+[    1.681480] 48024000.serial: ttyO2 at MMIO 0x48024000 (irq = 31, base_baud = 3000000) is a OMAP UART2
+[    1.693333] omap_uart 481a6000.serial: no wakeirq for uart3
+[    1.699920] 481a6000.serial: ttyO3 at MMIO 0x481a6000 (irq = 32, base_baud = 3000000) is a OMAP UART3
+[    1.763223] brd: module loaded
+[    1.812867] loop: module loaded
+[    1.816232] oops_init
+[    1.818845] Unable to handle kernel NULL pointer dereference at virtual address 00000042
+[    1.827396] pgd = c0004000
+[    1.830369] [00000042] *pgd=00000000
+[    1.834186] Internal error: Oops: 805 [#1] SMP ARM
+[    1.839246] Modules linked in:
+[    1.842492] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 4.14.40 #4
+[    1.848827] Hardware name: Generic AM33XX (Flattened Device Tree)
+[    1.855253] task: ce08ae00 task.stack: ce08c000
+[    1.860060] PC is at do_oops+0x8/0x10
+[    1.863932] LR is at so2_oops_init+0x10/0x1c
+[    1.868439] pc : [<c05b33e0>]    lr : [<c05b33f8>]    psr: 60000013
+[    1.875048] sp : ce08df10  ip : 00000000  fp : 00000000
+[    1.880559] r10: c0c53858  r9 : c0c6ded4  r8 : 000000ae
+[    1.886070] r7 : c0dce000  r6 : ffffe000  r5 : c05b33e8  r4 : 00000000
+[    1.892955] r3 : 00000000  r2 : 00000061  r1 : 00000001  r0 : 00000009
+[    1.899841] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment none
+[    1.907367] Control: 10c5387d  Table: 80004019  DAC: 00000051
+[    1.913429] Process swapper/0 (pid: 1, stack limit = 0xce08c218)
+[    1.919768] Stack: (0xce08df10 to 0xce08e000)
+[    1.924373] df00:                             
+**********************************************************
 
 gdb
 ********************************************
-$ gdb ./vmlinux
 
-(gdb) list *(do_panic+0x8)
-0xc1244138 is in do_panic (lib/test_panic.c:8).
-3
-4 static struct timer_list panic_timer;
-5
-6 static void do_panic(struct timer_list *unused)
-7 {
-8         *(int*)0x42 = 'a';
-9 }
-10
-11        static int so2_panic_init(void)
+$ arm-linux-gnueabihf-gdb ./vmlinux
+
+Reading symbols from ./vmlinux...done.
+(gdb) list *(do_oops+0x8)
+0xc05b33e0 is in do_oops (drivers/misc/oops.c:7).
+2	#include <linux/module.h>
+3	#include <linux/kernel.h>
+4	
+5	static noinline void do_oops(void)
+6	{
+7	    *(int*)0x42 = 'a';
+8	}
+9	
+10	static int so2_oops_init(void)
+11	{
+(gdb) q
 
 
+***************************************
+$ arm-linux-gnueabihf-addr2line -e vmlinux c05b33e0
+/drivers/misc/oops.c:7
 
-
+***************************************
